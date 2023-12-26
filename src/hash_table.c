@@ -1,13 +1,46 @@
 
 #include "hash_table.h"
+#include "prime.h"
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define HT_PRIME_1 (157)
 #define HT_PRIME_2 (163)
+#define HT_INITIAL_BASE_SIZE (53)
 
 static ht_item HT_DELETED_ITEM = {NULL, NULL};
+
+static void ht_resize(ht_hash_table* ht, const int new_size) {
+    if (new_size < HT_INITIAL_BASE_SIZE) {
+        return; // 최소 크기보다 작으면 조정하지 않음
+    }
+
+    ht_hash_table* new_ht = malloc(sizeof(ht_hash_table));
+    new_ht->size = next_prime(new_size);
+    new_ht->count = 0;
+    new_ht->items = calloc(new_ht->size, sizeof(ht_item*));
+
+    for (int i = 0; i < ht->size; i++) {
+        ht_item* item = ht->items[i];
+        if (item != NULL && item != &HT_DELETED_ITEM) {
+            ht_insert(new_ht, item->key, item->value); // 기존 항목 새 테이블에 삽입
+        }
+    }
+
+    // ht와 new_ht의 속성 교환
+    const int tmp_size = ht->size;
+    ht_item** tmp_items = ht->items;
+
+    ht->size = new_ht->size;
+    ht->count = new_ht->count;
+    ht->items = new_ht->items;
+
+    new_ht->size = tmp_size;
+    new_ht->items = tmp_items;
+    ht_del_hash_table(new_ht); // 임시 테이블 해제
+}
+
 
 static ht_item* ht_new_item(const char* k, const char* v) {
     ht_item* pa_i = malloc(sizeof(ht_item));
@@ -19,7 +52,7 @@ static ht_item* ht_new_item(const char* k, const char* v) {
 ht_hash_table* ht_new() {
     ht_hash_table* pa_ht = malloc(sizeof(ht_hash_table));
 
-    pa_ht->size = 53; // how many ht_item can be stored
+    pa_ht->size = HT_INITIAL_BASE_SIZE; // how many ht_item can be stored
     pa_ht->count = 0;
     pa_ht->items = calloc((size_t)pa_ht->size, sizeof(ht_item*));
     return pa_ht;
@@ -61,6 +94,11 @@ static int ht_get_hash(
 }
 
 void ht_insert(ht_hash_table* ht, const char* key, const char* value) {
+    const int load = ht->count * 100 / ht->size;
+    if (load > 70) {
+        ht_resize(ht, ht->size * 2); // 크기 증가
+    }
+
     ht_item* item = ht_new_item(key, value);
     int index = ht_get_hash(item->key, ht->size, 0);
     ht_item* cur_item = ht->items[index];
@@ -101,6 +139,11 @@ char* ht_search(ht_hash_table* ht, const char* key) {
 
 
 void ht_delete(ht_hash_table* ht, const char* key) {
+    const int load = ht->count * 100 / ht->size;
+    if (load < 10) {
+        ht_resize(ht, ht->size / 2); // 크기 감소
+    }
+
     int index = ht_get_hash(key, ht->size, 0);
     ht_item* item = ht->items[index];
     int i = 1;
@@ -118,3 +161,4 @@ void ht_delete(ht_hash_table* ht, const char* key) {
         i++;
     } 
 }
+

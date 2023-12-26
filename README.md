@@ -2,7 +2,7 @@
 
 hash table implementation in C
 
-## api
+## ht api
 
 a = Associative arrays
 
@@ -70,3 +70,7 @@ arr[724] = 1 or 0 (724의 존재 여부)
 `해시 충돌을 방지할 수 있는 조건?`
 
 데이터가 한정된 경우 (유저 입력을 받아 데이터가 워낙 많이 들어와 충돌 가능성이 있지만 한정된 데이터만으로 해시 함수를 돌리는 경우는 가능)
+
+## hash load factor
+
+0.7 이상이면 ht의 사이즈를 늘리기로 하자.

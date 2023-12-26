@@ -2,6 +2,14 @@
 
 hash table implementation in C
 
+## api
+
+a = Associative arrays
+
+search(a, k): return the value v associated with key k from the associative array a, or NULL if the key does not exist.
+insert(a, k, v): store the pair k:v in the associative array a.
+delete(a, k): delete the k:v pair associated with k, or do nothing if k does not exist.
+
 ## theory of hash table
 
 배열에 특정 값을 루프를 돌지 않으며 O(1)으로 찾는 방법 -> 해시 테이블의 등장 과정.

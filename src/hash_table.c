@@ -67,13 +67,14 @@ static void ht_del_item(ht_item* i) {
 void ht_del_hash_table(ht_hash_table* ht) {
     for (int i = 0; i < ht->size; i++) {
         ht_item* item = ht->items[i];
-        if (item != NULL) {
+        if (item != NULL && item != &HT_DELETED_ITEM) {
             ht_del_item(item);
         }
     }
     free(ht->items);
     free(ht);
 }
+
 
 static int ht_hash(const char* s, const int a, const int m) {
     long hash = 0;
